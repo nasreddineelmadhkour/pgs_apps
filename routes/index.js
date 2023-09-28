@@ -894,6 +894,55 @@ router.post("/adddriver", async function(req, res, next) {
     next(err);
   }
 });
+
+router.post('/editdriver', async function (req, res) {
+
+  try {
+    const {DRIVER_NUMBER} = req.body;
+
+    const query = `SELECT [DRIVER_NUMBER],d.[NAME],[INITIAL],[LICENSE_NUMBER],d.[CARRIER_NUMBER],c.[NAME] as CARRIER_NAME FROM [dbo].[DRIVER] d, dbo.CARRIER c where d.CARRIER_NUMBER=c.CARRIER_NUMBER AND DRIVER_NUMBER=${DRIVER_NUMBER};`;
+    const pool = await sql.query(connectionString, query, async (err, rows) => {
+
+      if (err) {
+        console.log(err);
+        res.status(500).json({error: "Internal server error"});
+        return;
+      }
+
+
+      res.render('editdriver',{title:'EDIT DRIVER',action:'list', sampleData:rows})
+      //console.log(rows);
+
+
+    });
+  } catch (err) {
+    next(err);
+  }
+
+
+
+});
+router.post("/editdriverSubmit", async function(req, res) {
+  try {
+    const { DRIVER_NUMBER, NAME, INITIAL, LICENSE_NUMBER } = req.body;
+
+    const query = `UPDATE [dbo].[DRIVER] SET [NAME] = '${NAME}',[INITIAL] = '${INITIAL}',[LICENSE_NUMBER] = '${LICENSE_NUMBER}' WHERE DRIVER_NUMBER =${DRIVER_NUMBER} `;
+    const pool = await sql.query(connectionString, query, async (err, rows) => {
+
+
+
+
+      const query = `SELECT [DRIVER_NUMBER],d.NAME,[INITIAL],[LICENSE_NUMBER],d.CARRIER_NUMBER,c.NAME as CARRIER_NAME FROM dbo.DRIVER d , dbo.CARRIER c WHERE c.CARRIER_NUMBER=d.CARRIER_NUMBER AND d.IS_DROPED=0`;
+      const pool = await sql.query(connectionString, query, async (err, rows) => {
+        res.render('showdriver', {title: 'LIST DRIVERS', action: 'list', sampleData: rows})
+
+      });
+    })
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/deletedriver", async function(req, res) {
   try {
     const {DRIVER_NUMBER} = req.body;
@@ -1149,6 +1198,56 @@ router.post("/addtrailer", async function(req, res, next) {
     next(err);
   }
 });
+
+router.post('/edittrailer', async function (req, res) {
+
+  try {
+    const {TRAILER_CODE} = req.body;
+
+    const query = `SELECT [TRAILER_CODE],[SERIAL_NUMBER],[LICENSE_NUMBER],[STATE],[LOADING_TYPE],[USABLE_CAPACITY],t.[CARRIER_NUMBER],c.[NAME] as CARRIER_NAME FROM [dbo].[TRAILER] t, dbo.CARRIER c where t.CARRIER_NUMBER=c.CARRIER_NUMBER AND TRAILER_CODE='${TRAILER_CODE}'
+`;
+    const pool = await sql.query(connectionString, query, async (err, rows) => {
+
+      if (err) {
+        console.log(err);
+        res.status(500).json({error: "Internal server error"});
+        return;
+      }
+
+
+      res.render('edittrailer',{title:'EDIT TRAILER',action:'list', sampleData:rows})
+      //console.log(rows);
+
+
+    });
+  } catch (err) {
+    next(err);
+  }
+
+
+
+});
+router.post("/edittrailerSubmit", async function(req, res) {
+  try {
+    const { TRAILER_CODE, SERIAL_NUMBER, LICENSE_NUMBER, STATE, LOADING_TYPE, USABLE_CAPACITY} = req.body;
+    const query =`UPDATE [dbo].[trailer] SET [SERIAL_NUMBER] = '${SERIAL_NUMBER}',[STATE] = '${STATE}',[LICENSE_NUMBER] = '${LICENSE_NUMBER}' , USABLE_CAPACITY=${USABLE_CAPACITY},LOADING_TYPE='${LOADING_TYPE}' WHERE TRAILER_CODE = '${TRAILER_CODE}' `;
+    const pool = await sql.query(connectionString, query, async (err, rows) => {
+
+
+
+
+      const query = 'SELECT [TRAILER_CODE],[SERIAL_NUMBER],[LICENSE_NUMBER],[STATE],[LOADING_TYPE],[USABLE_CAPACITY],t.CARRIER_NUMBER,c.NAME as CARRIER_NAME FROM dbo.TRAILER t, dbo.CARRIER c where c.CARRIER_NUMBER=t.CARRIER_NUMBER AND t.IS_DROPED=0';
+      const pool = await sql.query(connectionString, query, async (err, rows) => {
+        res.render('showtrailer', {title: 'LIST TRAILERS', action: 'list', sampleData: rows})
+
+      });
+    })
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 
 // ***************************       VEHICULE         ******************************************
 router.get("/addvehicule", async function(req, res, next) {
